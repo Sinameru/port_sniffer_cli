@@ -1,0 +1,108 @@
+# --------------------
+# Rust / Cargo
+# --------------------
+# Build output directory
+/target/
+
+# Cargo.lock: keep for apps, ignore for libraries
+# Cargo.lock
+
+# Backup of original Cargo.toml files
+**/Cargo.toml.orig
+
+# Rust caches
+**/.cargo/registry/
+**/.cargo/git/
+**/.rustup/
+
+# --------------------
+# Editors / IDEs
+# --------------------
+# VSCode
+.vscode/
+*.code-workspace
+
+# IntelliJ / CLion
+.idea/
+*.iml
+
+# Vim
+*.swp
+*.swo
+*.tmp
+
+# Emacs
+*~
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# --------------------
+# Operating Systems
+# --------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# --------------------
+# Logs / Caches
+# --------------------
+*.log
+*.tmp
+*.cache
+
+# --------------------
+# Testing / Coverage
+# --------------------
+/coverage/
+*.prof
+*.profraw
+
+# --------------------
+# Binaries / Executables
+# --------------------
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+
+# --------------------
+# CI / Pipeline artifacts
+# --------------------
+/.github/workflows/
+/.gitlab-ci.yml
+/ci/
+/build/
+*.out
+*.pid
+
+# --------------------
+# Docker / Containers
+# --------------------
+.docker/
+docker-compose.override.yml
+
+# --------------------
+# Misc / Backup / Temp
+# --------------------
+*.bak
+*.old
+*.orig
+*.swp
+*.swo
+*.tmp
+*.log
+*.cache
+*.seed
+*.DS_Store
