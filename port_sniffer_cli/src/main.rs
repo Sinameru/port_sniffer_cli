@@ -16,7 +16,6 @@ const VERSION: &str = "1.0";
 const AUTHOR: &str = "Sinameru";
 const ABOUT: &str = "Simple port scanner CLI";
 
-// Command-line argument names and help strings
 // IP
 const LONG_IP: &str = "ip"; 
 const HELP_IP: &str = "Target IP address";
@@ -38,8 +37,11 @@ const SHORT_END_PORT: char = 'e';
 const DEFAULT_END_PORT: &str = "65535";
 
 // Min/Max TCP ports
-const MIN_PORT: u16 = 1; // Minimum valid TCP port
-const MAX_PORT: u16 = 65535; // Maximum valid TCP port
+const MIN_PORT: u16 = 1;
+const MAX_PORT: u16 = 65535;
+
+// Buffer size for mpsc channel
+const CHANNEL_BUFFER_SIZE: usize = 100;
 
 /* -------------------------
    Async scan function
@@ -133,11 +135,11 @@ async fn main() {
     }
 
     // Compute total number of ports to scan
-    let total_ports: u16 = end_port - start_port + 1;
+    let total_ports: u64 = (end_port - start_port + 1).into();
 
     // Create a progress bar and wrap it in an Arc for shared ownership
     let pb = Arc::new({
-        let pb = ProgressBar::new(total_ports as u64);
+        let pb = ProgressBar::new(total_ports);
         let style = ProgressStyle::default_bar()
             .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} ({eta})") // Visual layout
             .unwrap()
@@ -147,7 +149,7 @@ async fn main() {
     });
 
     // Create a channel to collect open ports
-    let (tx, mut rx) = mpsc::channel(100);
+    let (tx, mut rx) = mpsc::channel(CHANNEL_BUFFER_SIZE);
 
     // Spawn an async task per port
     for port in start_port..=end_port {
