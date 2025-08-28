@@ -1,0 +1,11 @@
+/Users/ngodoy/Documents/rust_projects/port_sniffer_cli/target/debug/deps/libconsole-8d9aa80c4d17d71b.rmeta: /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/lib.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/common_term.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/kb.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/term.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/unix_term.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/utils.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/ansi.rs
+
+/Users/ngodoy/Documents/rust_projects/port_sniffer_cli/target/debug/deps/console-8d9aa80c4d17d71b.d: /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/lib.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/common_term.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/kb.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/term.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/unix_term.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/utils.rs /Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/ansi.rs
+
+/Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/lib.rs:
+/Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/common_term.rs:
+/Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/kb.rs:
+/Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/term.rs:
+/Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/unix_term.rs:
+/Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/utils.rs:
+/Users/ngodoy/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/console-0.16.0/src/ansi.rs:

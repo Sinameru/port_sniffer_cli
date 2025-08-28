@@ -1,80 +1,120 @@
-// Import necessary crates
-use clap::{Arg, Command, value_parser}; // For CLI argument parsing
+//! # port_sniffer_cli
+//!
+//! A simple asynchronous TCP port scanner in Rust with a progress bar.
+//! Scans a range of ports on a target IP concurrently using Tokio.
+//!
+//! ## Example Usage
+//!
+//! ```bash
+//! port_sniffer_cli --ip 192.168.0.1 --start_port 1 --end_port 1024 --concurrency 50
+//! ```
+
+// Import required crates
+use clap::{Arg, Command, value_parser}; // CLI argument parsing
 use std::net::IpAddr; // Represents an IP address
-use std::sync::Arc; // For atomic reference-counted pointer (thread-safe shared ownership)
-use tokio::net::TcpStream; // Async TCP connections using Tokio
+use std::sync::Arc; // Atomic reference-counted pointer for thread-safe sharing
+use tokio::net::TcpStream; // Asynchronous TCP connections using Tokio
 use tokio::sync::mpsc; // Async multi-producer, single-consumer channel
-use tokio::time::{timeout, Duration}; // For setting timeouts on async operations
-use futures::stream::StreamExt; // for for_each_concurrent
-use indicatif::{ProgressBar, ProgressStyle}; // For progress bars in the terminal
+use tokio::time::{timeout, Duration}; // Set timeouts for async operations
+use futures::stream::StreamExt; // for `for_each_concurrent` on streams
+use indicatif::{ProgressBar, ProgressStyle}; // Terminal progress bars
 
 /* -------------------------
    Constants
    ------------------------- */
-// CLI metadata
+
+/// Application name
 const APP_NAME: &str = "port_sniffer_cli";
+/// Version
 const VERSION: &str = "1.0";
+/// Author
 const AUTHOR: &str = "Sinameru";
+/// About description
 const ABOUT: &str = "Simple port scanner CLI";
 
-// IP
-const LONG_IP: &str = "ip"; 
+/// Long name for IP argument
+const LONG_IP: &str = "ip";
+/// Help message for IP argument
 const HELP_IP: &str = "Target IP address";
 
-// Concurrency
+/// Long name for concurrency argument
 const LONG_CONCURRENCY: &str = "concurrency";
+/// Short name for concurrency argument
 const SHORT_CONCURRENCY: char = 'c';
+/// Help message for concurrency argument
 const HELP_CONCURRENCY: &str = "Number of concurrent scans (1-100, default 50)";
+/// Default concurrency value
 const DEFAULT_CONCURRENCY: &str = "50";
 
-// Start port
+/// Long name for start port
 const LONG_START_PORT: &str = "start_port";
+/// Short name for start port
 const SHORT_START_PORT: char = 's';
+/// Default start port
 const DEFAULT_START_PORT: &str = "1";
 
-// End port
+/// Long name for end port
 const LONG_END_PORT: &str = "end_port";
+/// Short name for end port
 const SHORT_END_PORT: char = 'e';
+/// Default end port
 const DEFAULT_END_PORT: &str = "65535";
 
-// Min/Max TCP ports
+/// Minimum valid TCP port
 const MIN_PORT: u16 = 1;
+/// Maximum valid TCP port
 const MAX_PORT: u16 = 65535;
 
-// Buffer size for mpsc channel
+/// Buffer size for the mpsc channel
 const CHANNEL_BUFFER_SIZE: usize = 100;
 
 /* -------------------------
-   Async scan function
+   Asynchronous scan function
    ------------------------- */
-/// `scan` attempts to connect to a given IP and port asynchronously.
-/// If successful, it sends the port through an mpsc channel and increments the progress bar.
+
+/// Attempts to connect to a given IP and port asynchronously.
+/// 
+/// If the connection succeeds, the port is sent through the mpsc channel and
+/// the progress bar is incremented.
+///
+/// # Arguments
+///
+/// * `tx` - Channel sender to report open ports
+/// * `port` - Port number to test
+/// * `addr` - Target IP address
+/// * `pb` - Shared progress bar
 async fn scan(tx: mpsc::Sender<u16>, port: u16, addr: IpAddr, pb: Arc<ProgressBar>) {
+    // Timeout of 3 seconds for the connection attempt
     let result = timeout(Duration::from_secs(3), TcpStream::connect((addr, port))).await;
-    // Ok(Ok(_)) means the connection succeeded before the timeout
+
+    // Ok(Ok(_)) = connection succeeded before timeout
     if let Ok(Ok(_)) = result {
-        // Timeout did NOT fire, and connect succeeded
+        // Send the open port to the channel (ignore failure)
         let _ = tx.send(port).await;
     }
-    // Otherwise: either timeout elapsed OR connect failed
+
+    // Increment the progress bar regardless of success or failure
     pb.inc(1);
 }
 
 /* -------------------------
    Main function
    ------------------------- */
-#[tokio::main] // Marks this async main function for Tokio runtime
+
+/// Main asynchronous entry point using Tokio runtime
+#[tokio::main]
 async fn main() {
-    // Parse command-line arguments using clap
+    // Parse command-line arguments with clap
     let matches = Command::new(APP_NAME)
         .version(VERSION)
         .author(AUTHOR)
         .about(ABOUT)
         .arg(
             Arg::new(LONG_IP)
+                .long(LONG_IP)
                 .help(HELP_IP)
                 .required(true) // IP is mandatory
-                .value_parser(value_parser!(IpAddr)), // Automatically parses IP addresses
+                .value_parser(value_parser!(IpAddr)), // Auto-parse as IP
         )
         .arg(
             Arg::new(LONG_CONCURRENCY)
@@ -83,6 +123,7 @@ async fn main() {
                 .help(HELP_CONCURRENCY)
                 .default_value(DEFAULT_CONCURRENCY)
                 .value_parser(|x: &str| {
+                    // Validate number and range
                     let val: usize = x.parse().map_err(|_| format!("`{x}` is not a number"))?;
                     if (1..=100).contains(&val) {
                         Ok(val)
@@ -123,38 +164,39 @@ async fn main() {
         )
         .get_matches();
 
-    // Extract values from the parsed arguments
+    // Extract values from CLI arguments
     let ip = matches.get_one::<IpAddr>(LONG_IP).copied().expect("Required by clap");
     let concurrency = matches.get_one::<usize>(LONG_CONCURRENCY).copied().unwrap();
     let start_port = matches.get_one::<u16>(LONG_START_PORT).copied().expect("Default ensured by clap");
     let end_port = matches.get_one::<u16>(LONG_END_PORT).copied().expect("Default ensured by clap");
 
-    // Simple sanity check: start port should not exceed end port
+    // Ensure start_port <= end_port
     if start_port > end_port {
         eprintln!("Error: start_port ({start_port}) cannot be greater than end_port ({end_port})");
         std::process::exit(1);
     }
 
-    // Compute total number of ports to scan
+    // Total number of ports to scan
     let total_ports: u64 = (end_port - start_port + 1).into();
 
-    // Create a progress bar and wrap it in an Arc for shared ownership
+    // Create a shared progress bar
     let pb = Arc::new({
         let pb = ProgressBar::new(total_ports);
         let style = ProgressStyle::default_bar()
             .template("[{elapsed_precise}] {bar:40.red/cyan} {pos}/{len} ({eta})")
-            .unwrap_or_else(|_| ProgressStyle::default_bar()) // fallback in case of error
+            .unwrap_or_else(|_| ProgressStyle::default_bar()) // fallback if template fails
             .progress_chars("=>-");
         pb.set_style(style);
         pb
     });
 
-    // Create a channel to collect open ports
+    // Create channel for collecting open ports
     let (tx, mut rx) = mpsc::channel(CHANNEL_BUFFER_SIZE);
 
-    // Iterate over the port range as a stream
+    // Create a stream of ports to scan
     let ports = tokio_stream::iter(start_port..=end_port);
 
+    // Scan ports concurrently with the specified limit
     ports
         .for_each_concurrent(concurrency, |port| {
             let tx = tx.clone();
@@ -165,7 +207,7 @@ async fn main() {
         })
         .await;
 
-    drop(tx); // Drop the original sender to close the channel when all tasks finish
+    drop(tx); // Close the channel when all tasks finish
 
     // Collect open ports from the channel
     let mut open_ports = vec![];
@@ -178,7 +220,7 @@ async fn main() {
 
     println!();
 
-    // Sort the ports and display them
+    // Sort and display open ports
     open_ports.sort();
     if open_ports.is_empty() {
         println!("No open ports found.");
