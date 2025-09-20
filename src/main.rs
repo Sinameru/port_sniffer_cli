@@ -66,7 +66,7 @@ const MIN_PORT: u16 = 1;
 const MAX_PORT: u16 = 65535;
 
 /// Buffer size for the mpsc channel
-const CHANNEL_BUFFER_SIZE: usize = 100;
+const CHANNEL_BUFFER_SIZE: usize = 250;
 
 /* -------------------------
    Asynchronous scan function
