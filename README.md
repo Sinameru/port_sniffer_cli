@@ -114,17 +114,3 @@ Add a `LICENSE` file to your repository to specify a license. This project does 
 ## Author
 
 Sinameru
-
----
-
-## Contributing / Improvements (optional)
-
-Ideas you might add later — none require changing the core scanning logic:
-
-* Graceful Ctrl+C handling to stop scanning early and print partial results
-* Stream discovered ports to stdout as they arrive (instead of collecting all then printing)
-* A test harness to reproduce edge-case behavior and stress-test channel/backpressure
-
----
-
-This `README.md` documents the current behavior and usage without changing your scanner code. Keep scanning responsibly.
